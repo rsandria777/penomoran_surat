@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Aplikasi Penomoran Surat</title>
+  <style>
+    body {
+      font-family: 'Poppins', Arial, sans-serif;
+      background-image: url("{{ url_for('static', filename='background.jpg') }}");
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 40px 50px;
+      border-radius: 20px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    .login-container img {
+      width: 120px;               /* diperbesar sedikit agar jelas */
+      height: auto;               /* biar proporsional */
+      margin-bottom: 15px;
+      object-fit: contain;        /* tampil penuh */
+      border-radius: 0;           /* tidak dibulatkan agar tidak terpotong */
+    }
+
+
+    h1 {
+      margin-bottom: 25px;
+      color: #333;
+      font-size: 1.6em;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1.1em;
+      box-sizing: border-box;
+      transition: all 0.3s;
+    }
+
+    input:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
+      outline: none;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .flash {
+      list-style: none;
+      color: red;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding: 0;
+    }
+
+    p.footer {
+      margin-top: 20px;
+      font-size: 0.9em;
+      color: #666;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 600px) {
+      .login-container {
+        width: 90%;
+        padding: 30px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Instansi">
+    <h1>Login Penomoran Surat<br>BAPPERIDA Konawe Utara</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash">
+          {% for category, message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <input type="text" name="username" placeholder="Masukkan username" required>
+      <input type="password" name="password" placeholder="Masukkan password" required>
+      <button type="submit">🔐 Masuk</button>
+    </form>
+
+    <p class="footer">© {{ datetime.utcnow().year }} BAPPERIDA Konawe Utara</p>
+  </div>
+</body>
+</html>

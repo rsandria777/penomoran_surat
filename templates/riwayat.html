@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Riwayat Nomor Surat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        h2 {
+            text-align: center;
+        }
+        a {
+            text-decoration: none;
+            color: #007bff;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 15px;
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+        }
+        .back-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>📜 Riwayat Nomor Surat</h2>
+
+    <a href="{{ url_for('index') }}" class="back-btn">⬅️ Kembali ke Halaman Utama</a>
+
+    {% if data %}
+    <table>
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Jenis Surat</th>
+                <th>Perihal</th>
+                <th>Tanggal Surat</th>
+                <th>Nomor Surat</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in data %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ row['kode_surat'] }}</td>
+                <td>{{ row['perihal'] }}</td>
+                <td>{{ row['tanggal_surat'] }}</td>
+                <td><b>{{ row['nomor_surat'] }}</b></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align:center; color:gray;">Belum ada surat yang dibuat.</p>
+    {% endif %}
+
+</body>
+</html>

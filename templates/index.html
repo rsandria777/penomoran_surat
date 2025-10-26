@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Aplikasi Penomoran Surat BAPPERIDA Kabupaten Konawe Utara</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url("{{ url_for('static', filename='background.jpg') }}");
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      display: flex;
+      flex-direction: column;       /* agar konten bisa diatur vertikal */
+      align-items: center;          /* rata tengah horizontal */
+      min-height: 100vh;
+      overflow-y: auto;
+    }
+
+    .container {
+      background-color: rgba(255, 255, 255, 0.95);
+      width: 100%;
+      max-width: 550px;
+      padding: 30px 40px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    form {
+      width: 100%;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    select, input, button {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1.1em;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 6px;
+      padding: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover { background-color: #0056b3; }
+    #loading { display: none; color: #007bff; font-style: italic; }
+
+    .flash { list-style: none; color: green; margin-bottom: 10px; padding: 0; }
+
+    @media (max-width: 600px) {
+      .container { width: 95%; padding: 20px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    {% if session.get('admin_logged_in') %}
+    <div style="text-align:right; margin-bottom:10px;">
+
+    <!-- Nama pengguna dan role -->
+    <div style="color:#555; font-size:14px; margin-bottom:4px;">
+      👤 {{ session.get('username') }}
+      {% if session.get('role') == 'admin' %}
+        <span style="color:#007bff;">(Admin)</span>
+      {% elif session.get('role') == 'staf' %}
+        <span style="color:#28a745;">(Staf)</span>
+      {% endif %}
+    </div>
+
+    <!-- Tombol logout di bawahnya -->
+    <form method="POST" action="{{ url_for('logout') }}" style="margin:0;">
+      <button type="submit"
+              style="background-color:#dc3545; color:white; border:none;
+                     padding:6px 12px; border-radius:6px; cursor:pointer;
+                     font-size:13px;">
+        🚪 Logout
+      </button>
+    </form>
+    </div>
+    {% endif %}
+
+
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Instansi" class="logo">
+    <h1>Aplikasi Penomoran Surat<br>BAPPERIDA Kabupaten Konawe Utara</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash">
+          {% for category, message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form id="formNomor" action="{{ url_for('ambil_nomor') }}" method="POST" enctype="multipart/form-data">
+      <label>Pilih Klasifikasi Surat (Level 1)</label>
+      <select name="layer1" id="layer1" required>
+        <option value="">-- Pilih Klasifikasi Surat --</option>
+        {% for row in layer1 %}
+          <option value="{{ row.kode }}">{{ row.kode }} - {{ row.nama }}</option>
+        {% endfor %}
+      </select>
+
+      <div id="layer2Container"></div>
+      <div id="layer3Container"></div>
+      <div id="layer4Container"></div>
+
+      <label>Perihal Surat</label>
+      <input type="text" name="perihal" placeholder="Masukkan perihal surat" required>
+
+      <label>Tanggal Surat</label>
+      <input type="date" name="tanggal_surat" max="{{ today }}" required>
+
+      <label for="file_surat">Upload File Surat (PDF/DOCX/JPG/PNG)</label>
+      <input type="file" id="file_surat" name="file_surat" accept=".pdf,.doc,.docx,.jpg,.png" required>
+
+      <button type="submit" id="btnAmbil">📄 Ambil Nomor Surat</button>
+      <span id="loading">⏳ Sedang memproses...</span>
+    </form>
+
+    {% if session.get('admin_logged_in') %}
+
+      <!-- Tombol untuk semua pengguna (admin & staf) -->
+      <form method="GET" action="{{ url_for('riwayat_surat') }}">
+        <button type="submit" style="background-color:#28a745;">📜 Riwayat Surat</button>
+      </form>
+
+      <!-- Tombol khusus admin -->
+      {% if session.get('role') == 'admin' %}
+        <form method="GET" action="{{ url_for('konfirmasi_reset') }}">
+          <button type="submit" style="background-color:#d9534f;">🔄 Reset Nomor Surat</button>
+        </form>
+
+      {% endif %}
+
+    {% endif %}
+
+  </div>
+
+<script>
+  // Fungsi ambil sub-klasifikasi
+  function loadChildren(parentKode, targetDiv) {
+    $.getJSON('/get_children', { parent: parentKode }, function(data) {
+      if (data.length > 0) {
+        let selectHtml = `<label>Pilih Sub-Klasifikasi</label>
+          <select name="${targetDiv}" id="${targetDiv}" required>
+            <option value="">-- Pilih --</option>`;
+        data.forEach(function(item) {
+          selectHtml += `<option value="${item.kode}">${item.kode} - ${item.nama}</option>`;
+        });
+        selectHtml += '</select>';
+        $("#" + targetDiv + "Container").html(selectHtml);
+      } else {
+        $("#" + targetDiv + "Container").html('');
+      }
+    });
+  }
+
+  // 🔹 Fungsi bantu: hapus dan sembunyikan semua layer di bawah level tertentu
+  function resetLowerLayers(level) {
+    const mapping = {
+      1: ['layer2Container', 'layer3Container', 'layer4Container'],
+      2: ['layer3Container', 'layer4Container'],
+      3: ['layer4Container'],
+      4: []
+    };
+    (mapping[level] || []).forEach(id => $('#' + id).empty());
+  }
+
+  // 🔹 Fungsi deteksi apakah pilihan adalah "Lainnya"
+  function isLainnyaOption(selectElem) {
+    if (!selectElem) return false;
+    const selectedText = selectElem.options[selectElem.selectedIndex]?.text || '';
+    return selectedText.toLowerCase().includes('lainnya');
+  }
+
+  // Layer 1 → tampilkan Layer 2
+  $('#layer1').on('change', function() {
+    const kode = $(this).val();
+    resetLowerLayers(1);
+    if (kode) loadChildren(kode, 'layer2');
+  });
+
+  // Layer 2 → tampilkan Layer 3, tapi sembunyikan jika "Lainnya"
+  $(document).on('change', '#layer2', function() {
+    const kode = $(this).val();
+    resetLowerLayers(2);
+    const select = this;
+    if (kode && !isLainnyaOption(select)) {
+      loadChildren(kode, 'layer3');
+    }
+  });
+
+  // Layer 3 → tampilkan Layer 4, tapi sembunyikan jika "Lainnya"
+  $(document).on('change', '#layer3', function() {
+    const kode = $(this).val();
+    resetLowerLayers(3);
+    const select = this;
+    if (kode && !isLainnyaOption(select)) {
+      loadChildren(kode, 'layer4');
+    }
+  });
+
+  // Anti-double submit
+  $('#formNomor').on('submit', function() {
+    const btn = $('#btnAmbil');
+    const loading = $('#loading');
+    btn.prop('disabled', true).text('Memproses...');
+    loading.show();
+  });
+</script>
+
+</body>
+</html>

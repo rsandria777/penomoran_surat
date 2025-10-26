@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hasil Penomoran Surat</title>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #e0f7fa, #80deea);
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      background: white;
+      max-width: 750px;
+      margin: 80px auto;
+      padding: 50px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.15);
+      text-align: center;
+    }
+
+    h1 {
+      color: #00695c;
+      font-size: 2.2em;
+      margin-bottom: 25px;
+    }
+
+    p {
+      color: #333;
+      font-size: 1.4em;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      display: inline-block;
+      background-color: #00897b;
+      color: white;
+      padding: 14px 28px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #00796b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Nomor Surat Berhasil Dibuat!</h1>
+    <p><strong>Nomor Surat:</strong><br> {{ nomor_surat }}</p>
+    <a href="{{ url_for('index') }}" class="btn">Kembali ke Halaman Utama</a>
+  </div>
+
+</body>
+</html>
